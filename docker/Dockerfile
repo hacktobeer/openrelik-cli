@@ -4,7 +4,9 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     iputils-ping \
-    curl
+    curl \
+    jq \
+    netcat-openbsd
 
 RUN pip install uv
 
@@ -12,5 +14,5 @@ ADD . /app
 WORKDIR /app
 RUN uv sync --all-groups
 
-ENV PYTHONPATH /app
+ENV PYTHONPATH=/app
 

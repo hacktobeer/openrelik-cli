@@ -18,8 +18,6 @@ OPENRELIK_API_KEY = os.environ.get("OPENRELIK_API_KEY", None)
 if OPENRELIK_API_KEY is None:
     raise RuntimeError("No OPENRELIK_API_KEY set!")
 
-# OPENRELIK_API_URL = "http://localhost:8710"
-# OPENRELIK_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3Yjc5NjVmNzhmZjU0NDVjODIxMzRhMmM5YWIwOTExMCIsImlhdCI6MTc1MDc2Mjg0MiwibmJmIjoxNzUwNzYyODQyLCJleHAiOjE3NTEzNjc2NDIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODcxMCIsImF1ZCI6ImFwaS1jbGllbnQiLCJqdGkiOiI0NzI5N2MzYTI3MjA0OWU1OGMxNGRhMjZmZjcwN2RkNSIsInRva2VuX3R5cGUiOiJyZWZyZXNoIn0.mvmV9vNpw3VTWZzOagm_-MMAgAZsEQunMeASiWqjLPA"
 api_client = APIClient(OPENRELIK_API_URL, OPENRELIK_API_KEY)
 
 app = typer.Typer()
@@ -109,10 +107,19 @@ def get_template(
         print(result)
 
 
+@template_app.command("delete")
+def delete(template_id) -> int | None:
+    # Delete template with
+    # Does not exist
+    print("delete - Not implemented yet server side!")
+    pass
+
+
 @template_app.command("update")
-def update(template_id, file_path) -> int:
+def update(template_id, file_path) -> int | None:
     # Update template with spec from file_path and return template id
     # Does not exist
+    print("update - Not implemented yet server side!")
     pass
 
 
