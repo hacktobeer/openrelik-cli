@@ -3,7 +3,7 @@ name = "openrelik-cli"
 version = "0.1.0"
 description = "OpenRelik CLI tool"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "openrelik-api-client>=0.2.4",
     "typer>=0.16.0",
