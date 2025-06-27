@@ -12,6 +12,10 @@ RUN pip install uv
 
 ADD . /app
 WORKDIR /app
+
+chmod +x main
+ENV openrelik-cli=main.py
+
 RUN uv sync --all-groups
 
 ENV PYTHONPATH=/app

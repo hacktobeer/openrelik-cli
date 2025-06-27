@@ -1,3 +1,5 @@
+#!/usr/bin/env -S uv run --script
+
 import json
 from pathlib import Path
 import logging
@@ -55,6 +57,19 @@ def get_workflow(
     print(workflow)
 
 
+@workflow_app.command("status")
+def status_workflow(
+    workflow_id: Annotated[int, typer.Option(help="Workflow ID.")],
+    folder_id: Annotated[int, typer.Option(help="Folder ID.")],
+) -> str | None:
+    # Get the status of a workflow in a folder.
+    workflow = workflowapi.WorkflowsAPI(api_client).get_workflow(folder_id, workflow_id)
+
+    print(f"Workflow ID: {workflow_id}\n")
+    # TODO(rbdebeer): Print nicely the status of tasks in the workflow with status/final message
+    print(workflow)
+
+
 @workflow_app.command("update")
 def update_workflow_spec(
     workflow_id: Annotated[int, typer.Option(help="Workflow ID.")],
@@ -108,7 +123,9 @@ def get_template(
 
 
 @template_app.command("delete")
-def delete(template_id) -> int | None:
+def delete(
+    template_id: Annotated[int, typer.Option(help="Template ID.")],
+) -> str | None:
     # Delete template with
     # Does not exist
     print("delete - Not implemented yet server side!")
@@ -116,7 +133,10 @@ def delete(template_id) -> int | None:
 
 
 @template_app.command("update")
-def update(template_id, file_path) -> int | None:
+def update(
+    template_id: Annotated[int, typer.Option(help="Template ID.")],
+    file_path: Annotated[str, typer.Option(help="Filepath with new template data.")],
+) -> str | None:
     # Update template with spec from file_path and return template id
     # Does not exist
     print("update - Not implemented yet server side!")
