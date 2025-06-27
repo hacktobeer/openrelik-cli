@@ -13,7 +13,7 @@ RUN pip install uv
 ADD . /app
 WORKDIR /app
 
-chmod +x main
+RUN chmod +x main.py
 ENV openrelik-cli=main.py
 
 RUN uv sync --all-groups
