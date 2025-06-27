@@ -14,7 +14,7 @@ ADD . /app
 WORKDIR /app
 
 RUN chmod +x main.py
-RUN echo 'alias openrelik-cli="main.py"' >> /root/.bashrc
+RUN echo 'alias openrelik-cli="/app/main.py"' >> /root/.bashrc
 
 RUN uv sync --all-groups
 
