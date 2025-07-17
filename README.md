@@ -12,11 +12,20 @@
    * dalete
 
 ## Usage 
-Create an `env` file with your API key:
+Create an `env` file with your OpeRelik API key:
 ````
 OPENRELIK_API_KEY=<YOUR_OPENRELIK_API_KEY>
 ````
 
+### Standalone
+Install uv -> https://docs.astral.sh/uv/getting-started/installation/
+
+```
+$ source env
+$ uv run main.py --help
+````
+
+### Docker
 ```
 $ docker run -v -ti -env-file ./env ghcr.io/hacktobeer/openrelik-cli /bin/bash
 /app# openrelik-cli --help

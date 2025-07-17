@@ -6,7 +6,9 @@ import logging
 import os
 import typer
 from typing_extensions import Annotated
+from rich.console import Console
 from rich.pretty import pprint
+from rich.table import Table
 
 
 from openrelik_api_client.api_client import APIClient
@@ -27,6 +29,10 @@ template_app = typer.Typer()
 app.add_typer(template_app, name="template")
 workflow_app = typer.Typer()
 app.add_typer(workflow_app, name="workflow")
+folder_app = typer.Typer()
+app.add_typer(folder_app, name="folder")
+files_app = typer.Typer()
+app.add_typer(files_app, name="files")
 
 
 @workflow_app.command("create")
@@ -123,7 +129,7 @@ def get_template(
 
 
 @template_app.command("delete")
-def delete(
+def delete_template(
     template_id: Annotated[int, typer.Option(help="Template ID.")],
 ) -> str | None:
     # Delete template with
@@ -133,7 +139,7 @@ def delete(
 
 
 @template_app.command("update")
-def update(
+def update_template(
     template_id: Annotated[int, typer.Option(help="Template ID.")],
     file_path: Annotated[str, typer.Option(help="Filepath with new template data.")],
 ) -> str | None:
@@ -141,6 +147,61 @@ def update(
     # Does not exist
     print("update - Not implemented yet server side!")
     pass
+
+
+@folder_app.command("get")
+def get_folder(
+    folder_id: Annotated[int | None, typer.Option(help="Folder ID.")] = None,
+    raw: Annotated[bool, typer.Option(help="Output raw json API reply.")] = False,
+) -> str | None:
+    if folder_id:
+        result = api_client.get(f"/folders/{folder_id}")
+    else:
+        result = api_client.get("/folders/")
+
+    result = json.loads(result.text)
+    if raw:
+        pprint(result)
+    else:
+        table = Table()
+        table.add_column("ID")
+        table.add_column("Name")
+        try:
+            for folder in result:
+                table.add_row(str(folder.get("id")), folder.get("display_name"))
+        except AttributeError:
+            table.add_row(str(result.get("id")), result.get("display_name"))
+        console = Console()
+        console.print(table)
+
+
+@files_app.command("get")
+def get_files(
+    folder_id: Annotated[int | None, typer.Option(help="Folder ID.")] = None,
+    raw: Annotated[bool, typer.Option(help="Output raw json API reply.")] = False,
+) -> str | None:
+    if folder_id:
+        result = api_client.get(f"/folders/{folder_id}/files/")
+        result = json.loads(result.text)
+        if raw:
+            pprint(result)
+        else:
+            table = Table()
+            table.add_column("ID")
+            table.add_column("Filename")
+            table.add_column("Size")
+            table.add_column("Datatype")
+            table.add_column("Mimetype")
+            for f in result:
+                table.add_row(
+                    str(f.get("id")),
+                    f.get("display_name"),
+                    str(f.get("filesize")),
+                    f.get("data_type"),
+                    f.get("magic_mime"),
+                )
+            console = Console()
+            console.print(table)
 
 
 if __name__ == "__main__":
