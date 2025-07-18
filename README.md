@@ -2,14 +2,18 @@
 
 ## Features
 * workflow
+   * get 
    * create
-   * get
    * update
    * status
 * templates
    * get
-   * update
-   * dalete
+* folder
+   * get
+* files
+   * get
+   * upload
+   * download
 
 ## Usage 
 Create an `env` file with your OpeRelik API key:
