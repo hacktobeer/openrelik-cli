@@ -1,14 +1,16 @@
 #!/usr/bin/env -S uv run --script
 
 import json
-from pathlib import Path
 import logging
 import os
+import sys
 import typer
-from typing_extensions import Annotated
+
+from pathlib import Path
 from rich.console import Console
 from rich.pretty import pprint
 from rich.table import Table
+from typing_extensions import Annotated
 
 
 from openrelik_api_client.api_client import APIClient
@@ -53,27 +55,43 @@ def create(
 
 @workflow_app.command("get")
 def get_workflow(
-    workflow_id: Annotated[int, typer.Option(help="Workflow ID.")],
-    folder_id: Annotated[int, typer.Option(help="Folder ID.")],
+    folder_id: Annotated[int | None, typer.Option(help="Folder ID.")] = None,
+    workflow_id: Annotated[int | None, typer.Option(help="Workflow ID.")] = None,
 ) -> str | None:
-    # Get a workflow in a folder.
-    workflow = workflowapi.WorkflowsAPI(api_client).get_workflow(folder_id, workflow_id)
+    # Get a workflows in a folder or a specific workflow by id.
+    if workflow_id:
+        workflow = api_client.get(f"/folders/0/workflows/{workflow_id}")
+    elif folder_id:
+        workflow = api_client.get(f"/folders/{folder_id}/workflows/workflows")
+    else:
+        print("Error: workflow-id or folder-id needed.")
+        return
 
-    print(f"Workflow ID: {workflow_id}\n")
-    print(workflow)
+    pprint(json.loads(workflow.text))
 
 
 @workflow_app.command("status")
 def status_workflow(
     workflow_id: Annotated[int, typer.Option(help="Workflow ID.")],
-    folder_id: Annotated[int, typer.Option(help="Folder ID.")],
+    raw: Annotated[bool, typer.Option(help="Output raw json API reply.")] = False,
 ) -> str | None:
     # Get the status of a workflow in a folder.
-    workflow = workflowapi.WorkflowsAPI(api_client).get_workflow(folder_id, workflow_id)
-
-    print(f"Workflow ID: {workflow_id}\n")
-    # TODO(rbdebeer): Print nicely the status of tasks in the workflow with status/final message
-    print(workflow)
+    workflow = api_client.get(f"/folders/0/workflows/{workflow_id}")
+    workflow = json.loads(workflow.text)
+    print(f"Name: {workflow.get('display_name')}")
+    if raw:
+        pprint(workflow)
+    else:
+        table = Table()
+        table.add_column("Task ID")
+        table.add_column("Name")
+        table.add_column("Status")
+        for task in workflow.get("tasks"):
+            table.add_row(
+                str(task.get("id")), task.get("display_name"), task.get("status_short")
+            )
+        console = Console()
+        console.print(table)
 
 
 @workflow_app.command("update")
@@ -156,23 +174,41 @@ def get_folder(
 ) -> str | None:
     if folder_id:
         result = api_client.get(f"/folders/{folder_id}")
+        subfolders = api_client.get(f"/folders/{folder_id}/folders/")
     else:
         result = api_client.get("/folders/")
+        subfolders = None
 
-    result = json.loads(result.text)
+    result = [json.loads(result.text)]
     if raw:
         pprint(result)
     else:
         table = Table()
         table.add_column("ID")
         table.add_column("Name")
-        try:
-            for folder in result:
-                table.add_row(str(folder.get("id")), folder.get("display_name"))
-        except AttributeError:
-            table.add_row(str(result.get("id")), result.get("display_name"))
+        for folder in result:
+            table.add_row(str(folder.get("id")), folder.get("display_name"))
+
         console = Console()
         console.print(table)
+
+        if subfolders:
+            table = Table(title="Subfolders")
+            table.add_column("ID")
+            table.add_column("Name")
+            for folder in json.loads(subfolders.text):
+                table.add_row(str(folder.get("id")), folder.get("display_name"))
+            console = Console()
+            console.print(table)
+
+        for folder in result:
+            table = Table(title=f"Workflows for folder {folder_id}")
+            table.add_column("ID")
+            table.add_column("Name")
+            for workflow in folder.get("workflows"):
+                table.add_row(str(workflow.get("id")), workflow.get("display_name"))
+            console = Console()
+            console.print(table)
 
 
 @files_app.command("get")
@@ -202,6 +238,23 @@ def get_files(
                 )
             console = Console()
             console.print(table)
+
+
+@files_app.command("download")
+def download_file(
+    file_id: Annotated[int, typer.Option(help="File ID.")],
+) -> str | None:
+    r = api_client.get(f"/files/{file_id}/download").content
+    sys.stdout.buffer.write(r)
+
+
+@files_app.command("upload")
+def upload_file(
+    file_path: Annotated[str, typer.Option(help="File path.")],
+    folder_id: Annotated[int, typer.Option(help="Folder ID.")],
+) -> int | None:
+    r = api_client.upload_file(file_path, folder_id)
+    print(f"File ID: {r}")
 
 
 if __name__ == "__main__":
