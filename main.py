@@ -127,7 +127,7 @@ def get_template(
     if id:
         for template in templates:
             if template.get("id") == id:
-                result = template["spec_json"]
+                result = json.dumps(template)
     else:
         data = []
         # Only return IDs and names of workflows
@@ -141,7 +141,7 @@ def get_template(
         result = json.dumps(data)
 
     if nice:
-        pprint(json.loads(result))
+        pprint(result)
     else:
         print(result)
 
@@ -163,8 +163,11 @@ def update_template(
 ) -> str | None:
     # Update template with spec from file_path and return template id
     # Does not exist
-    print("update - Not implemented yet server side!")
-    pass
+    with open(file_path, "r") as f:
+        jsonstr = f.read()
+        print(jsonstr)
+        r = api_client.patch(f"/workflows/templates/{template_id}", data=jsonstr)
+        print(r.text)
 
 
 @folder_app.command("get")
