@@ -31,7 +31,7 @@ $ uv run main.py --help
 
 ### Docker
 ```
-$ docker run -v -ti -env-file ./env ghcr.io/hacktobeer/openrelik-cli /bin/bash
+$ docker run -v -ti --env-file ./env ghcr.io/hacktobeer/openrelik-cli /bin/bash
 /app# openrelik-cli --help
 
 Usage: openrelik-cli [OPTIONS] COMMAND [ARGS]...
