@@ -150,10 +150,13 @@ def get_template(
 def delete_template(
     template_id: Annotated[int, typer.Option(help="Template ID.")],
 ) -> str | None:
-    # Delete template with
-    # Does not exist
-    print("delete - Not implemented yet server side!")
-    pass
+    if template_id:
+        template = api_client.delete(f"/workflows/templates/{template_id}")
+    else:
+        print("Error: template-id needed.")
+        return
+
+    print("Template succesfully deleted.")
 
 
 @template_app.command("update")
